@@ -5,6 +5,7 @@ from models.language_model import LanguageModel
 
 translate_controller = Blueprint("translate_controller", __name__)
 
+
 @translate_controller.route("/", methods=["GET", "POST"])
 def index():
     languages = LanguageModel.list_dicts()

@@ -1,6 +1,7 @@
 from flask import Flask
 from controllers.translate_controller import translate_controller
 from controllers.admin_controller import admin_controller
+from src.controllers.history_controller import history_controller
 
 
 from os import environ
@@ -13,6 +14,7 @@ app.static_folder = "views/static"
 
 app.register_blueprint(translate_controller, url_prefix="/")
 app.register_blueprint(admin_controller, url_prefix="/admin")
+app.register_blueprint(history_controller)
 
 
 def start_server(host="0.0.0.0", port=8000):
