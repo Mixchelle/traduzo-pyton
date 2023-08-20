@@ -1,7 +1,7 @@
 from flask import Flask
 from controllers.translate_controller import translate_controller
 from controllers.admin_controller import admin_controller
-from controllers.history_controller import history_controller  # Importando a controller de histórico
+from controllers.history_controller import history_controller
 
 from os import environ
 from waitress import serve
@@ -20,6 +20,7 @@ def start_server(host="0.0.0.0", port=8000):
         return app.run(debug=True, host=host, port=port)
     else:
         serve(app, host=host, port=port)
+
 
 if __name__ == "__main__":
     start_server()

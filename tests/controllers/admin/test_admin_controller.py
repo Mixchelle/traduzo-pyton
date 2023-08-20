@@ -1,53 +1,40 @@
-from typing import Callable
-from unittest.mock import patch
-
-import pytest
-from pytest_dependency import (
-    assert_fails_with_broken_asset,
-    get_skip_markers,
-    get_test_assessment_configs,
-    run_pytest_quietly,
-)
-
-from src.models.user_model import UserModel  # specific
-from tests.controllers.admin import mocks  # specific
-from tests.controllers.admin import test_admin_controller  # specific
-
-TA_CFG = get_test_assessment_configs(
-    UserModel,
-    mocks,
-    test_admin_controller,
-)
-
-pytestmark = get_skip_markers(TA_CFG)
+from bson import ObjectId
+from src.models.history_model import HistoryModel
+from src.models.user_model import UserModel
 
 
-@pytest.mark.dependency()
-def test_students_sanity_check():
-    return_code = run_pytest_quietly([TA_CFG.STUDENT_TEST_FILE_PATH])
+def test_history_delete(app_test):
+    # Criação de um usuário para autenticação
+    user = UserModel(
+        name="Admin",
+        level="admin",
+        token="admin_token123"
+    )
+    user.save()
 
-    if return_code != pytest.ExitCode.OK:
-        pytest.skip(
-            f"Seus testes em {TA_CFG.STUDENT_TEST_FILE_PATH} "
-            "ainda não estão passando! "
-            "Verifique-os e tente novamente."
-        )
+    # Criação de um registro no histórico
+    history_entry = HistoryModel({
+        "original_text": "Test translation",
+        "translated_text": "Tradução de teste",
+        "source_language": "en",
+        "target_language": "pt"
+    })
+    history_entry.save()
 
+    # Obtém o ID do registro do histórico
+    history_id = str(history_entry.get_id())
 
-@pytest.mark.dependency(depends=["test_students_sanity_check"])
-@pytest.mark.parametrize(
-    "broken_asset",
-    TA_CFG.BROKEN_ASSETS_LIST,
-)
-def test_assess_students_user_model(broken_asset: Callable):
-    with patch(TA_CFG.PATCH_TARGET, broken_asset):
-        return_code = run_pytest_quietly([TA_CFG.STUDENT_TEST_FILE_PATH])
+    # Faz a requisição DELETE para excluir o registro do histórico
+    response = app_test.delete(
+        f"/admin/history/{history_id}",
+        headers={
+            "Authorization": "admin_token123",
+            "User": "Admin"
+        }
+    )
 
-    assert_fails_with_broken_asset(broken_asset, return_code, TA_CFG)
+    # Verifica se a resposta tem status 204 (No Content)
+    assert response.status_code == 204
 
-
-@pytest.mark.dependency(
-    depends=["test_assess_students_user_model"], include_all_instances=True
-)
-def test_assess_students_user_model_final():
-    pass
+    # Verifica se o registro foi excluído
+    assert HistoryModel.find_one({"_id": ObjectId(history_id)}) is None

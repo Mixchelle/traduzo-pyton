@@ -6,6 +6,7 @@ from models.history_model import HistoryModel
 
 translate_controller = Blueprint("translate_controller", __name__)
 
+
 @translate_controller.route("/", methods=["GET", "POST"])
 def index():
     languages = LanguageModel.list_dicts()
@@ -26,7 +27,7 @@ def index():
             "target_language": translate_to
         }
 
-        HistoryModel(history_data).save()  
+        HistoryModel(history_data).save()
 
         return render_template(
             "index.html",
@@ -50,6 +51,7 @@ def index():
         translate_to=translate_to,
         translated=translated
     )
+
 
 @translate_controller.route("/reverse", methods=["POST"])
 def reverse():
