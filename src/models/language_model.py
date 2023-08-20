@@ -2,7 +2,6 @@ from .abstract_model import AbstractModel
 from database.db import db
 
 
-# Req. 1
 class LanguageModel(AbstractModel):
     _collection = db.languages
 
@@ -10,18 +9,12 @@ class LanguageModel(AbstractModel):
         super().__init__(data)
 
     def to_dict(self):
-        return self.data.copy()
+        return {
+            "name": self.data.get("name"),
+            "acronym": self.data.get("acronym")
+        }
 
     @classmethod
     def list_dicts(cls):
         data = cls.find()
         return [item.to_dict() for item in data]
-
-    # Req. 2
-    def to_dict(self):
-        raise NotImplementedError
-
-    # Req. 3
-    @classmethod
-    def list_dicts(cls):
-        raise NotImplementedError
