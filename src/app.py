@@ -14,7 +14,7 @@ app.static_folder = "views/static"
 
 app.register_blueprint(translate_controller, url_prefix="/")
 app.register_blueprint(admin_controller, url_prefix="/admin")
-app.register_blueprint(history_controller)
+app.register_blueprint(history_controller, url_prefix="/history")
 
 
 def start_server(host="0.0.0.0", port=8000):
